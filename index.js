@@ -28,7 +28,7 @@ app.post('/chat', async (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('  console.log(`Сървърът е стартиран на порт ${port}`);!');
+  res.send('GPT ботът е онлайн и те чака!');
 });
 
 app.listen(port, () => {
