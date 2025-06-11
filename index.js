@@ -1,36 +1,39 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { Configuration, OpenAIApi } = require('openai');
 require('dotenv').config();
+
+const { OpenAI } = require('openai');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-const configuration = new Configuration({
+// Създаване на инстанция на OpenAI с ключа от .env
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
 
 app.use(bodyParser.json());
 
 app.post('/chat', async (req, res) => {
   const { message } = req.body;
+
   try {
-    const response = await openai.createChatCompletion({
+    const chatCompletion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: message }],
     });
-    res.json({ reply: response.data.choices[0].message.content });
+
+    res.json({ reply: chatCompletion.choices[0].message.content });
   } catch (error) {
-    console.error(error);
-    res.status(500).send('Error communicating with OpenAI');
+    console.error('Грешка при OpenAI заявката:', error);
+    res.status(500).send('Възникна проблем при свързването с OpenAI.');
   }
 });
 
 app.get('/', (req, res) => {
-  res.send('GPT ботът е онлайн и те чака!');
+  res.send('GPT ботът е онлайн и работи!');
 });
 
 app.listen(port, () => {
-  console.log(`Сървърът е стартиран на порт ${port}`);
+  console.log(`Сървърът е стартиран на http://localhost:${port}`);
 });
