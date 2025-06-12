@@ -1,115 +1,119 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>GPT Бот</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-end;
+      height: 100vh;
       margin: 0;
-      padding: 0;
+      padding: 20px;
     }
-    #chat-container {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
+
+    .chat-container {
       width: 350px;
-      max-height: 90vh;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.2);
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       display: flex;
       flex-direction: column;
-      overflow: hidden;
     }
-    #header {
-      background: #007bff;
-      color: white;
+
+    h2 {
+      margin: 0 0 10px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 60px;
       padding: 10px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    #messages {
-      padding: 10px;
-      overflow-y: auto;
-      flex: 1;
-    }
-    .message {
-      margin: 5px 0;
-    }
-    .user {
-      font-weight: bold;
-    }
-    #form {
-      display: flex;
-      border-top: 1px solid #ccc;
-    }
-    #message-input {
-      flex: 1;
-      border: none;
-      padding: 10px;
-      font-size: 14px;
       resize: none;
+      margin-bottom: 10px;
     }
-    #send-button {
-      background: #007bff;
+
+    button {
+      padding: 10px;
+      background-color: #007bff;
       color: white;
       border: none;
-      padding: 10px;
       cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .response-area {
+      margin-top: 10px;
+      padding: 10px;
+      background: #e9f0fa;
+      border-radius: 4px;
+      overflow-y: auto;
+      height: 200px;
+    }
+
+    .chat-message {
+      margin-bottom: 10px;
+    }
+
+    .chat-message.user {
+      font-weight: bold;
+    }
+
+    .chat-message.bot {
+      color: #333;
     }
   </style>
 </head>
 <body>
-  <div id="chat-container">
-    <div id="header">Чат Бот консултант</div>
-    <div id="messages">
-      <div class="message">Здравейте! Как мога да ви помогна днес?</div>
-    </div>
-    <form id="form">
-      <textarea id="message-input" placeholder="Въведи съобщение..." rows="2"></textarea>
-      <button type="submit" id="send-button">Изпрати</button>
-    </form>
+  <div class="chat-container">
+    <h2>GPT Бот</h2>
+    <textarea id="userInput" placeholder="Напиши въпрос..."></textarea>
+    <button onclick="sendMessage()">Изпрати</button>
+    <div class="response-area" id="chatBox"></div>
   </div>
 
   <script>
-    const form = document.getElementById('form');
-    const input = document.getElementById('message-input');
-    const messages = document.getElementById('messages');
+    async function sendMessage() {
+      const inputField = document.getElementById('userInput');
+      const chatBox = document.getElementById('chatBox');
+      const message = inputField.value.trim();
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const userMessage = input.value.trim();
-      if (!userMessage) return;
+      if (message === '') return;
 
       const userDiv = document.createElement('div');
-      userDiv.className = 'message user';
-      userDiv.textContent = '🧑‍💼 ' + userMessage;
-      messages.appendChild(userDiv);
-      input.value = ''; // изчисти полето
+      userDiv.className = 'chat-message user';
+      userDiv.textContent = 'Вие: ' + message;
+      chatBox.appendChild(userDiv);
+
+      inputField.value = '';
+      chatBox.scrollTop = chatBox.scrollHeight;
 
       try {
         const response = await fetch('https://gpt-bot-0cs6.onrender.com/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: userMessage }),
+          body: JSON.stringify({ message: message })
         });
 
         const data = await response.json();
         const botDiv = document.createElement('div');
-        botDiv.className = 'message';
-        botDiv.textContent = '🤖 ' + data.reply;
-        messages.appendChild(botDiv);
+        botDiv.className = 'chat-message bot';
+        botDiv.textContent = 'Бот: ' + data.reply;
+        chatBox.appendChild(botDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
       } catch (error) {
         const errorDiv = document.createElement('div');
-        errorDiv.className = 'message';
+        errorDiv.className = 'chat-message bot';
         errorDiv.textContent = '⚠️ Възникна грешка при комуникацията с GPT.';
-        messages.appendChild(errorDiv);
+        chatBox.appendChild(errorDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
       }
-
-      messages.scrollTop = messages.scrollHeight; // автоматично превъртане
-    });
+    }
   </script>
 </body>
 </html>
