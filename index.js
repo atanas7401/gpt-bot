@@ -6,108 +6,101 @@
   <title>GPT Бот</title>
   <style>
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: sans-serif;
       background: #f2f2f2;
+      margin: 0;
+      padding: 0;
     }
-
-    #chat-toggle {
+    #chat-container {
       position: fixed;
-      bottom: 10px;
-      right: 10px;
-      background-color: #007bff;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px 8px 0 0;
-      cursor: pointer;
-      z-index: 999;
-    }
-
-    #chat-box {
-      position: fixed;
-      bottom: 50px;
-      right: 10px;
+      bottom: 20px;
+      right: 20px;
       width: 350px;
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    #chat-header {
+      background: #007bff;
+      color: white;
+      padding: 10px;
+      cursor: pointer;
+    }
+    #chat-body {
       display: none;
-      flex-direction: column;
+      padding: 10px;
     }
-
-    #chat-box h2 {
-      margin-top: 0;
-    }
-
     textarea {
       width: 100%;
-      height: 80px;
+      height: 60px;
+      padding: 5px;
+      box-sizing: border-box;
       resize: none;
-      margin-bottom: 10px;
     }
-
     button {
-      background-color: #007bff;
+      margin-top: 5px;
+      padding: 8px 12px;
+      background: #007bff;
       color: white;
       border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
       cursor: pointer;
     }
-
     #response {
-      margin-top: 15px;
-      background: #e9f1ff;
+      margin-top: 10px;
       padding: 10px;
+      background: #e9f1ff;
       border-radius: 5px;
-      white-space: pre-wrap;
     }
   </style>
 </head>
 <body>
-  <div id="chat-toggle">Чат Бот консултант</div>
-  <div id="chat-box">
-    <h2>GPT Бот</h2>
-    <textarea id="message" placeholder="Задай въпрос тук..."></textarea>
+
+<div id="chat-container">
+  <div id="chat-header" onclick="toggleChat()">Чат Бот консултант</div>
+  <div id="chat-body">
+    <h3>GPT Бот</h3>
+    <textarea id="message" placeholder="Въведи въпрос..."></textarea>
     <button onclick="sendMessage()">Изпрати</button>
     <div id="response"></div>
   </div>
+</div>
 
-  <script>
-    const BACKEND_URL = "https://gpt-bot-0cs6.onrender.com/chat"; // Твоят работещ backend
+<script>
+  const apiUrl = "https://gpt-bot-0cs6.onrender.com/chat"; // твоя backend URL
 
-    document.getElementById('chat-toggle').onclick = () => {
-      const box = document.getElementById('chat-box');
-      box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'flex' : 'none';
-    };
+  function toggleChat() {
+    const body = document.getElementById("chat-body");
+    body.style.display = body.style.display === "none" ? "block" : "none";
+  }
 
-    async function sendMessage() {
-      const messageField = document.getElementById('message');
-      const responseDiv = document.getElementById('response');
-      const message = messageField.value.trim();
+  async function sendMessage() {
+    const messageInput = document.getElementById("message");
+    const responseDiv = document.getElementById("response");
+    const message = messageInput.value.trim();
 
-      if (!message) return;
+    if (!message) return;
 
-      // Показваме временно съобщение „Изчакване...“
-      responseDiv.innerHTML = "⏳ Изчакване на отговор...";
+    responseDiv.innerText = "Моля, изчакай...";
+    try {
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+      });
 
-      try {
-        const res = await fetch(BACKEND_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ message }),
-        });
-
-        const data = await res.json();
-        responseDiv.innerHTML = data.reply;
-        messageField.value = ""; // 🧽 Изчистваме съобщението
-      } catch (err) {
-        responseDiv.innerHTML = "⚠️ Възникна грешка при комуникацията с GPT.";
-      }
+      const data = await res.json();
+      responseDiv.innerText = data.reply;
+      messageInput.value = ""; // 🟢 Тук изчистваме полето след изпращане
+    } catch (error) {
+      responseDiv.innerText = "Възникна грешка при комуникацията с GPT.";
+      console.error(error);
     }
-  </script>
+  }
+
+  // Показваме бота отворен по подразбиране:
+  document.getElementById("chat-body").style.display = "block";
+</script>
+
 </body>
 </html>
