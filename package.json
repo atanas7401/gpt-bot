@@ -1,7 +1,8 @@
+
 {
   "name": "gpt-bot",
   "version": "1.0.0",
-  "description": "GPT бот за рендване",
+  "description": "GPT бот с Express и OpenAI",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
